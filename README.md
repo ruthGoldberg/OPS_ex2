@@ -26,13 +26,18 @@ if you want to insert a string with spaces use " " , for example :"I love ice cr
 Part C - in this part we have only one c program called stshell.c.
 It contains the shell options > >> | (2 pipes max) , it ignores ctrl-c , and 'exit' shuts down the shell.
 to run this source file you need to write in the terminal of the project :
+
 make
+
 ./stshell
 
 now you can run for example:
 ls -l | grep txt | wc
+
 ./cmp text1.txt text2.txt -v > result.txt
+
 ./copy text1.txt text2.txt -v -f >> result.txt
+
 cat makefile
 
 in the zip you can find all the c files we mentioned , h file for partB , makefile and 2 txt files for you to run.
