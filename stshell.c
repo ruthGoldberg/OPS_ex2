@@ -20,9 +20,9 @@ int main() {
     char *outfile;
 
     char last_command[100]="";
-    int fd, amper, redirect,append=0,useLastCommend=0,input=0, piping, argc1;
+    int fd, amper, redirect,append=0,useLastCommend=0,input=0, piping , status =0, argc1=0 , argc2 , argc3;
     int pipe_arr[2];
-    char *argv1[10], *argv2[10];
+    char *argv1[10], *argv2[10] , *argv3[10];
 
     signal(SIGINT,handlerSignal);
     while (1)
@@ -41,7 +41,8 @@ int main() {
         }
 
         piping = 0;
-
+        argc2 = 0;
+        argc3 = 0;
         /* parse command line */
         i = 0;
         token = strtok (command," ");
@@ -49,6 +50,7 @@ int main() {
         {
             argv1[i] = token;
             token = strtok (NULL, " ");
+            printf("token1 : %s \n",argv1[i]);
             i++;
             if (token && ! strcmp(token, "|")) {
                 piping ++;
@@ -74,18 +76,38 @@ int main() {
         }
 
         /* Does command contain pipe */
-        if (piping) {
+        if (piping == 1) {
             i = 0;
+            token = strtok (NULL, " ");
             while (token!= NULL)
             {
-                printf("%s \n", token);
-                token = strtok (NULL, " ");
                 argv2[i] = token;
+                token = strtok (NULL, " ");
+                printf("token2 : %s \n",argv2[i]);
                 i++;
+                if (token && ! strcmp(token, "|")) {
+                    piping ++;
+                    break;
+                }
             }
             argv2[i] = NULL;
+            argc2 = i;
         }
-            amper = 0;
+        if (piping == 2) {
+            i = 0;
+            token = strtok (NULL, " ");
+            while (token!= NULL)
+            {
+                argv3[i] = token;
+                token = strtok (NULL, " ");
+                printf("token3 : %s \n",argv3[i]);
+                i++;
+
+            }
+            argv3[i] = NULL;
+            argc3 = i;
+        }
+        amper = 0;
         //printf("%d, %s, %s ,%s\n",argc1,argv1[0],argv1[1],argv1[2]);
         if (argc1 > 1 && !strcmp(argv1[argc1 - 2], ">")) {
             redirect = 1;
@@ -146,30 +168,31 @@ int main() {
 
                 if (fork() == 0) {
                     /* first component of command line */
-                    //close(STDOUT_FILENO);
+                    close(STDOUT_FILENO);
                     dup2(pipe_arr[1],STDOUT_FILENO);
                     close(pipe_arr[1]);
-                    //close(pipe_arr[0]);
+                    close(pipe_arr[0]);
                     /* stdout now goes to pipe */
                     /* child process does command */
                     execvp(argv1[0], argv1);
+                }else {
+                    /* 2nd command component of command line */
+                    close(STDIN_FILENO);
+                    dup2(pipe_arr[0],STDIN_FILENO);
+                    close(pipe_arr[0]);
+                    close(pipe_arr[1]);
+                    /* standard input now comes from pipe */
+                    execvp(argv2[0], argv2);
                 }
-                /* 2nd command component of command line */
-                close(STDIN_FILENO);
-                dup(pipe_arr[0]);
-                close(pipe_arr[0]);
-                close(pipe_arr[1]);
-                /* standard input now comes from pipe */
-                execvp(argv2[0], argv2);
             }
             else
                 execvp(argv1[0], argv1);
         }
         /* parent continues over here... */
         /* waits for child to exit if required */
-        if (amper == 0)
-            //retid = wait(&status);
-
-            strcpy(last_command,command);
+        if (amper == 0) {
+            wait(&status);
+        }
+        strcpy(last_command,command);
     }
 }
