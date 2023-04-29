@@ -21,12 +21,17 @@ int main() {
 
     char last_command[100]="";
     int fd, amper, redirect,append=0,useLastCommend=0,input=0, piping , status =0, argc1=0 , argc2 , argc3;
-    int pipe_arr[2];
+    int fd1[2] , fd2[2];
     char *argv1[10], *argv2[10] , *argv3[10];
 
     signal(SIGINT,handlerSignal);
     while (1)
     {
+        for (int i = 0; i < 10; i++) {
+            argv1[i] = NULL;
+            argv2[i] = NULL;
+            argv3[i] = NULL;
+        }
         printf("BeniAndRutiShell$ ");
         fflush(stdout);
         if(!useLastCommend){
@@ -163,24 +168,66 @@ int main() {
                 close(fd);
                 /* stdin is now redirected */
             }
-            if (piping) {
-                pipe (pipe_arr);
+            if (piping == 1) {
+                pipe (fd1);
 
                 if (fork() == 0) {
                     /* first component of command line */
                     close(STDOUT_FILENO);
-                    dup2(pipe_arr[1],STDOUT_FILENO);
-                    close(pipe_arr[1]);
-                    close(pipe_arr[0]);
+                    dup2(fd1[1],STDOUT_FILENO);
+                    close(fd1[1]);
+                    close(fd1[0]);
                     /* stdout now goes to pipe */
                     /* child process does command */
                     execvp(argv1[0], argv1);
                 }else {
                     /* 2nd command component of command line */
                     close(STDIN_FILENO);
-                    dup2(pipe_arr[0],STDIN_FILENO);
-                    close(pipe_arr[0]);
-                    close(pipe_arr[1]);
+                    dup2(fd1[0],STDIN_FILENO);
+                    close(fd1[0]);
+                    close(fd1[1]);
+                    /* standard input now comes from pipe */
+                    execvp(argv2[0], argv2);
+                }
+            }
+            if (piping == 2) {
+                pipe (fd1);
+
+                if (fork() == 0) {
+                    /* first component of command line */
+                    close(STDOUT_FILENO);
+                    dup2(fd1[1], STDOUT_FILENO);
+                    close(fd1[1]);
+                    close(fd1[0]);
+                    /* stdout now goes to pipe */
+                    /* child process does command */
+                    execvp(argv1[0], argv1);
+                }else {
+                    pipe(fd2);
+                    if (fork() == 0) {
+                        close(STDIN_FILENO);
+                        dup2(fd1[0], STDIN_FILENO);
+                        close(fd1[0]);
+                        close(fd1[1]);
+
+                        close(STDOUT_FILENO);
+                        dup2(fd2[1], STDOUT_FILENO);
+                        close(fd2[1]);
+                        close(fd2[0]);
+                        execvp(argv2[0], argv2);
+                    }else{
+                        close(STDIN_FILENO);
+                        dup2(fd2[0], STDIN_FILENO);
+                        close(fd1[0]);
+                        close(fd1[1]);
+                        close(fd2[0]);
+                        close(fd2[1]);
+                        /* standard input now comes from pipe */
+                        execvp(argv3[0], argv3);
+                        wait(NULL);
+
+                    }
+                    wait(NULL);
                     /* standard input now comes from pipe */
                     execvp(argv2[0], argv2);
                 }
