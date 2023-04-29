@@ -48,6 +48,6 @@ stshell.o: stshell.c
 .PHONY: clean all
 
 clean:
-	rm -f *.o *.so cmp copy encode decode
+	rm -f *.o *.so cmp copy encode decode stshell
 
 

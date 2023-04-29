@@ -20,7 +20,7 @@ int main() {
     char *outfile;
 
     char last_command[100]="";
-    int fd, amper, redirect,append=0,useLastCommend=0,input=0, piping , status =0, argc1=0 , argc2 , argc3;
+    int fd, amper, redirect,append=0,useLastCommend=0,input=0, piping , status =0, argc1=0 ;
     int fd1[2] , fd2[2];
     char *argv1[10], *argv2[10] , *argv3[10];
 
@@ -46,8 +46,6 @@ int main() {
         }
 
         piping = 0;
-        argc2 = 0;
-        argc3 = 0;
         /* parse command line */
         i = 0;
         token = strtok (command," ");
@@ -55,7 +53,6 @@ int main() {
         {
             argv1[i] = token;
             token = strtok (NULL, " ");
-            printf("token1 : %s \n",argv1[i]);
             i++;
             if (token && ! strcmp(token, "|")) {
                 piping ++;
@@ -88,7 +85,6 @@ int main() {
             {
                 argv2[i] = token;
                 token = strtok (NULL, " ");
-                printf("token2 : %s \n",argv2[i]);
                 i++;
                 if (token && ! strcmp(token, "|")) {
                     piping ++;
@@ -96,7 +92,6 @@ int main() {
                 }
             }
             argv2[i] = NULL;
-            argc2 = i;
         }
         if (piping == 2) {
             i = 0;
@@ -105,12 +100,10 @@ int main() {
             {
                 argv3[i] = token;
                 token = strtok (NULL, " ");
-                printf("token3 : %s \n",argv3[i]);
                 i++;
 
             }
             argv3[i] = NULL;
-            argc3 = i;
         }
         amper = 0;
         //printf("%d, %s, %s ,%s\n",argc1,argv1[0],argv1[1],argv1[2]);
