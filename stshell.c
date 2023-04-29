@@ -116,7 +116,6 @@ int main() {
         }
         else {
             redirect = 0;
-            //printf("2::%d, %s, %s ,%s\n",argc1,argv1[0],argv1[1],argv1[2]);
             // Append
             if (argc1 > 1 && ! strcmp(argv1[argc1 - 2], ">>")) {
                 append = 1;
@@ -192,8 +191,7 @@ int main() {
                     dup2(fd1[1], STDOUT_FILENO);
                     close(fd1[1]);
                     close(fd1[0]);
-                    /* stdout now goes to pipe */
-                    /* child process does command */
+
                     execvp(argv1[0], argv1);
                 }else {
                     pipe(fd2);
@@ -215,21 +213,20 @@ int main() {
                         close(fd1[1]);
                         close(fd2[0]);
                         close(fd2[1]);
-                        /* standard input now comes from pipe */
+
                         execvp(argv3[0], argv3);
                         wait(NULL);
 
                     }
                     wait(NULL);
-                    /* standard input now comes from pipe */
+
                     execvp(argv2[0], argv2);
                 }
             }
             else
                 execvp(argv1[0], argv1);
         }
-        /* parent continues over here... */
-        /* waits for child to exit if required */
+
         if (amper == 0) {
             wait(&status);
         }
